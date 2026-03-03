@@ -74,7 +74,7 @@ export function HeroSection() {
             </span>
           </h1>
           <p className="mx-auto max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Secure & encrypted script delivery for Roblox. Premium scripts, fast service, maximum performance.
+            Secure & Undetected script for Roblox. Premium scripts, fast service, maximum performance.
           </p>
         </div>
 
