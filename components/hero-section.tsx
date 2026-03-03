@@ -52,7 +52,7 @@ export function HeroSection() {
             </span>
           </h1>
           <p className="mx-auto max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Secure & encrypted script delivery for Roblox. Premium scripts, fast service, maximum performance.
+            Secure & encrypted script. Premium scripts, fast service, maximum performance.
           </p>
         </div>
 
@@ -86,7 +86,7 @@ export function HeroSection() {
             </div>
             <div className="flex items-center gap-3 rounded-xl bg-background/80 p-3 font-mono text-sm text-secondary-foreground">
               <code className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none">
-                {'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app/loader"))()'}
+                {'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app"))()'}
               </code>
               <CopyButton text={'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app"))()'} />
             </div>
