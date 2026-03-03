@@ -30,15 +30,37 @@ export function HeroSection() {
 
       {/* Main Content */}
       <div className="relative z-10 flex flex-col items-center gap-8 text-center">
-        {/* Logo with Glow */}
-        <div className="animate-float relative">
-          <div className="absolute inset-0 scale-110 rounded-full bg-primary/20 blur-3xl" />
+        {/* Logo with Outline Glow */}
+        <div className="animate-float relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
+          {/* Outer glow layer - large soft glow tracing the logo outline */}
+          <div className="logo-glow-outer pointer-events-none absolute inset-0" aria-hidden="true">
+            <Image
+              src="/images/logo.png"
+              alt=""
+              width={200}
+              height={200}
+              className="h-full w-full object-contain"
+              priority
+            />
+          </div>
+          {/* Inner glow layer - tighter glow for sharper outline */}
+          <div className="logo-glow-inner pointer-events-none absolute inset-0" aria-hidden="true">
+            <Image
+              src="/images/logo.png"
+              alt=""
+              width={200}
+              height={200}
+              className="h-full w-full object-contain"
+              priority
+            />
+          </div>
+          {/* Main logo */}
           <Image
             src="/images/logo.png"
             alt="XZuyaX's HUB Logo"
-            width={180}
-            height={180}
-            className="animate-pulse-glow relative rounded-2xl"
+            width={200}
+            height={200}
+            className="animate-pulse-glow relative h-full w-full object-contain"
             priority
           />
         </div>
@@ -52,7 +74,7 @@ export function HeroSection() {
             </span>
           </h1>
           <p className="mx-auto max-w-lg text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Secure & encrypted script. Premium scripts, fast service, maximum performance.
+            Secure & encrypted script delivery for Roblox. Premium scripts, fast service, maximum performance.
           </p>
         </div>
 

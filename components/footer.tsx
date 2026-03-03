@@ -13,7 +13,7 @@ export function Footer() {
                 alt="XZuyaX's HUB Logo"
                 width={32}
                 height={32}
-                className="rounded-lg"
+                className="h-8 w-8 object-contain"
               />
               <span className="text-lg font-bold text-foreground">
                 {"XZuyaX's"} <span className="text-primary">HUB</span>

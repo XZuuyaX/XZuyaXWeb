@@ -27,7 +27,7 @@ export function Navbar() {
               alt="XZuyaX's HUB Logo"
               width={40}
               height={40}
-              className="rounded-lg"
+              className="h-10 w-10 object-contain"
             />
             <span className="text-lg font-bold text-foreground">
               {"XZuyaX's"} <span className="text-primary">HUB</span>
