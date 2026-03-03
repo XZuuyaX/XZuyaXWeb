@@ -27,7 +27,7 @@ export function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-3">
             <a
-              href="https://discord.gg/"
+              href="https://discord.gg/X4H7phPu8P"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:border-[#5865f2]/50 hover:text-[#5865f2]"
@@ -39,7 +39,7 @@ export function Footer() {
               <span className="hidden sm:inline">Discord</span>
             </a>
             <a
-              href="https://youtube.com/"
+              href="https://youtube.com/@xzuyax-d7n"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:border-[#ff0000]/50 hover:text-[#ff0000]"
@@ -51,7 +51,7 @@ export function Footer() {
               <span className="hidden sm:inline">YouTube</span>
             </a>
             <a
-              href="https://tiktok.com/"
+              href="https://tiktok.com/@zuyaxrawr"
               target="_blank"
               rel="noopener noreferrer"
               className="group flex items-center gap-2 rounded-xl border border-border bg-secondary/30 px-4 py-2.5 text-sm font-medium text-muted-foreground transition-all hover:border-foreground/50 hover:text-foreground"
