@@ -40,7 +40,7 @@ export function AboutSection() {
               {/* Stats */}
               <div className="mt-6 flex flex-wrap justify-center gap-6 md:justify-start">
                 <div>
-                  <div className="text-2xl font-bold text-primary">2+</div>
+                  <div className="text-2xl font-bold text-primary">2</div>
                   <div className="text-xs text-muted-foreground">Scripts</div>
                 </div>
                 <div>
