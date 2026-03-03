@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   const defaultScript = `-- XZuyaX's HUB Loader
 -- Visit https://xzuyax-hub.vercel.app for scripts
 
-loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev/"))()
+loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()
 `
 
   return new NextResponse(defaultScript, {
