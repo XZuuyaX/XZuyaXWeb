@@ -27,9 +27,9 @@ export function AboutSection() {
                 About <span className="text-primary">{"XZuyaX's HUB"}</span>
               </h2>
               <p className="mb-4 leading-relaxed text-muted-foreground">
-                {"XZuyaX's HUB"} is a premium Roblox script hub dedicated to delivering high-quality,
-                secure, and optimized scripts for various popular games. We prioritize user safety with
-                our encrypted delivery system and key-based authentication.
+                {"XZuyaX's HUB"} is a premium Roblox script hub dedicated to give high-quality,
+                secure, undetected, and optimized scripts for various popular games. We prioritize user safety with
+                our encrypted system and key-based authentication.
               </p>
               <p className="leading-relaxed text-muted-foreground">
                 Our team continuously updates and maintains scripts to ensure compatibility and
@@ -48,8 +48,8 @@ export function AboutSection() {
                   <div className="text-xs text-muted-foreground">Supported Games</div>
                 </div>
                 <div>
-                  <div className="text-2xl font-bold text-primary">24/7</div>
-                  <div className="text-xs text-muted-foreground">Updates</div>
+                  <div className="text-2xl font-bold text-primary">20k+</div>
+                  <div className="text-xs text-muted-foreground">Users</div>
                 </div>
               </div>
             </div>
