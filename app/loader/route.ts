@@ -1,27 +1,39 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server";
+import { SCRIPTS } from "@/lib/scripts-data";
 
 export async function GET(request: NextRequest) {
-  const userAgent = request.headers.get("user-agent") || ""
+  const userAgent = request.headers.get("user-agent") || "";
+  const accept = request.headers.get("accept") || "";
+  const { searchParams } = new URL(request.url);
+  const scriptId = searchParams.get("id");
 
-  // If accessed from a browser, redirect to the home page
-  if (
-    userAgent.includes("Mozilla") ||
-    userAgent.includes("Chrome") ||
-    userAgent.includes("Safari") ||
-    userAgent.includes("Firefox") ||
-    userAgent.includes("Edge")
-  ) {
-    return NextResponse.redirect(new URL("/", request.url))
+  // Deteksi browser: jika Accept meminta HTML atau user-agent mengandung identifier browser umum
+  const isBrowser = accept.includes("text/html") || 
+    /Mozilla|Chrome|Safari|Firefox|Edge/i.test(userAgent);
+
+  if (isBrowser) {
+    // Redirect ke halaman scripts
+    return NextResponse.redirect(new URL("/scripts", request.url));
   }
 
-  // Accessed from an executor - execute the main loader from workers.dev
-  const loaderScript = `-- XZuyaX's HUB Universal Loader
+  // Jika ada parameter id, cari script yang sesuai
+  if (scriptId) {
+    const script = SCRIPTS.find((s) => s.id === scriptId);
+    if (script) {
+      return new NextResponse(script.content, {
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+  }
+
+  // Default: kirim main loader (dari workers.dev)
+  const defaultScript = `-- XZuyaX's HUB Universal Loader
 -- Secure & Encrypted Script Delivery
 
 loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()
-`
+`;
 
-  return new NextResponse(loaderScript, {
+  return new NextResponse(defaultScript, {
     headers: { "Content-Type": "text/plain" },
-  })
+  });
 }
