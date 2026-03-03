@@ -67,7 +67,7 @@ export function HeroSection() {
             <span className="relative">Get Scripts</span>
           </a>
           <a
-            href="https://discord.gg/"
+            href="https://discord.gg/X4H7phPu8P"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/50 px-8 py-3.5 text-sm font-semibold text-secondary-foreground transition-all hover:border-primary/40 hover:bg-secondary"
@@ -88,7 +88,7 @@ export function HeroSection() {
               <code className="flex-1 overflow-x-auto whitespace-nowrap scrollbar-none">
                 {'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app/loader"))()'}
               </code>
-              <CopyButton text={'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app/loader"))()'} />
+              <CopyButton text={'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app"))()'} />
             </div>
           </div>
         </div>
