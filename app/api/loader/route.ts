@@ -1,18 +1,24 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export async function GET(req: Request) {
+export async function GET(request: NextRequest) {
 
-  const ua = req.headers.get("user-agent") || ""
+  const userAgent = request.headers.get("user-agent") || ""
+  const { searchParams } = new URL(request.url)
 
-  // kalau request dari browser → tampilkan website normal
-  if (ua.includes("Mozilla")) {
-    return NextResponse.redirect("https://xzuyax-hub.vercel.app/home")
-  }
-
-  // loader logic (tetap support ?script=)
-  const { searchParams } = new URL(req.url)
   const scriptName = searchParams.get("script") || "UniversalLoader.lua"
 
+  // Browser → buka website
+  if (
+    userAgent.includes("Mozilla") ||
+    userAgent.includes("Chrome") ||
+    userAgent.includes("Safari") ||
+    userAgent.includes("Firefox") ||
+    userAgent.includes("Edge")
+  ) {
+    return NextResponse.redirect(new URL("/scripts", request.url))
+  }
+
+  // Executor → ambil script dari GitHub private repo
   const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`
 
   const response = await fetch(githubURL, {
@@ -33,9 +39,6 @@ export async function GET(req: Request) {
     .toString("utf8")
 
   return new NextResponse(script, {
-    headers: {
-      "Content-Type": "text/plain",
-      "Cache-Control": "no-cache"
-    }
+    headers: { "Content-Type": "text/plain" }
   })
 }
