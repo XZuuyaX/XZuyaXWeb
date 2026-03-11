@@ -2,6 +2,14 @@ import { NextResponse } from "next/server"
 
 export async function GET(req: Request) {
 
+  const ua = req.headers.get("user-agent") || ""
+
+  // kalau request dari browser → tampilkan website normal
+  if (ua.includes("Mozilla")) {
+    return NextResponse.redirect("https://xzuyax-hub.vercel.app/home")
+  }
+
+  // loader logic (tetap support ?script=)
   const { searchParams } = new URL(req.url)
   const scriptName = searchParams.get("script") || "UniversalLoader.lua"
 
