@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 export async function GET() {
   // This is the Lua script served to Roblox executors when they HttpGet the root URL
-  const luaScript = 'loadstring(game:HttpGet("https://loader.xzuyaxhub.workers.dev/?repo=Universal"))()'
+  const luaScript = 'loadstring(game:HttpGet("https://xzuyax-hub.vercel.app/api/loader?script=UniversalLoader.lua"))()'
 
   return new NextResponse(luaScript, {
     headers: {
