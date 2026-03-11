@@ -1,39 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { SCRIPTS } from "@/lib/scripts-data";
+import { NextResponse } from "next/server"
 
-export async function GET(request: NextRequest) {
-  const userAgent = request.headers.get("user-agent") || "";
-  const accept = request.headers.get("accept") || "";
-  const { searchParams } = new URL(request.url);
-  const scriptId = searchParams.get("id");
+export async function GET(req: Request) {
 
-  // Deteksi browser: jika Accept meminta HTML atau user-agent mengandung identifier browser umum
-  const isBrowser = accept.includes("text/html") || 
-    /Mozilla|Chrome|Safari|Firefox|Edge/i.test(userAgent);
+  const { searchParams } = new URL(req.url)
+  const scriptName = searchParams.get("script") || "UniversalLoader.lua"
 
-  if (isBrowser) {
-    // Redirect ke halaman scripts (atau halaman utama sesuai kebutuhan)
-    return NextResponse.redirect(new URL("/scripts", request.url));
-  }
+  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`
 
-  // Jika ada parameter id, cari script yang sesuai
-  if (scriptId) {
-    const script = SCRIPTS.find((s) => s.id === scriptId);
-    if (script) {
-      return new NextResponse(script.content, {
-        headers: { "Content-Type": "text/plain" },
-      });
+  const response = await fetch(githubURL, {
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      Accept: "application/vnd.github+json"
     }
+  })
+
+  if (!response.ok) {
+    return new NextResponse("Script not found", { status: 404 })
   }
 
-  // Default: kirim main loader (dari workers.dev)
-  const defaultScript = `-- XZuyaX's HUB Universal Loader
--- Secure & Encrypted Script Delivery
+  const data = await response.json()
 
-loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()
-`;
+  const script = Buffer
+    .from(data.content, "base64")
+    .toString("utf8")
 
-  return new NextResponse(defaultScript, {
-    headers: { "Content-Type": "text/plain" },
-  });
+  return new NextResponse(script, {
+    headers: {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache"
+    }
+  })
 }
