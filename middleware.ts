@@ -1,23 +1,36 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
-export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+export function middleware(req: NextRequest) {
 
-  // Only intercept the root path for executor detection
-  if (pathname === "/") {
-    const acceptHeader = request.headers.get("accept") || ""
+  const ua = req.headers.get("user-agent") || ""
+  const path = req.nextUrl.pathname
 
-    // Match the Cloudflare Worker pattern from query.sql:
-    // If Accept header contains text/html -> browser, show the website
-    // Otherwise -> executor (Roblox), serve Lua script
-    if (!acceptHeader.includes("text/html")) {
-      return NextResponse.rewrite(new URL("/api/lua-loader", request.url))
-    }
+  // browser buka website
+  if (ua.includes("Mozilla") && path === "/") {
+    return NextResponse.next()
+  }
+
+  // browser coba buka script langsung
+  if (ua.includes("Mozilla") && path !== "/") {
+    return new NextResponse("403 Forbidden", { status: 403 })
+  }
+
+  // executor root → UniversalLoader
+  if (path === "/") {
+    const url = req.nextUrl.clone()
+    url.pathname = "/api/loader"
+    url.searchParams.set("script", "UniversalLoader.lua")
+    return NextResponse.rewrite(url)
+  }
+
+  // executor script lain
+  if (path !== "/") {
+    const url = req.nextUrl.clone()
+    url.pathname = "/api/loader"
+    url.searchParams.set("script", path.replace("/", ""))
+    return NextResponse.rewrite(url)
   }
 
   return NextResponse.next()
-}
-
-export const config = {
-  matcher: ["/"],
 }
