@@ -1,36 +1,34 @@
-import { NextResponse } from "next/server"
-import type { NextRequest } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
-export function middleware(req: NextRequest) {
+export function middleware(request: NextRequest) {
 
-  const ua = req.headers.get("user-agent") || ""
-  const path = req.nextUrl.pathname
+  const { pathname } = request.nextUrl
+  const acceptHeader = request.headers.get("accept") || ""
 
-  // browser buka website
-  if (ua.includes("Mozilla") && path === "/") {
+  // browser request → tampil website normal
+  if (acceptHeader.includes("text/html")) {
     return NextResponse.next()
   }
 
-  // browser coba buka script langsung
-  if (ua.includes("Mozilla") && path !== "/") {
-    return new NextResponse("403 Forbidden", { status: 403 })
-  }
-
   // executor root → UniversalLoader
-  if (path === "/") {
-    const url = req.nextUrl.clone()
+  if (pathname === "/") {
+    const url = request.nextUrl.clone()
     url.pathname = "/api/loader"
     url.searchParams.set("script", "UniversalLoader.lua")
     return NextResponse.rewrite(url)
   }
 
-  // executor script lain
-  if (path !== "/") {
-    const url = req.nextUrl.clone()
+  // executor path script
+  if (pathname !== "/") {
+    const url = request.nextUrl.clone()
     url.pathname = "/api/loader"
-    url.searchParams.set("script", path.replace("/", ""))
+    url.searchParams.set("script", pathname.replace("/", ""))
     return NextResponse.rewrite(url)
   }
 
   return NextResponse.next()
+}
+
+export const config = {
+  matcher: ["/:path*"],
 }
