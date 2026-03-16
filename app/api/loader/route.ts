@@ -21,7 +21,34 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/scripts", request.url));
   }
 
-  // ===== Local static scripts =====
+  // ===== PRIORITY: GitHub private repo =====
+  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
+
+  try {
+    const response = await fetch(githubURL, {
+      headers: {
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        Accept: "application/vnd.github+json",
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const script = Buffer.from(data.content, "base64").toString("utf8");
+
+      return new NextResponse(script, {
+        headers: {
+          "Content-Type": "text/plain",
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+        },
+      });
+    }
+  } catch (error) {
+    // lanjut ke fallback berikutnya
+  }
+
+  // ===== Backup: Local scripts =====
   if (scriptId) {
     const script = SCRIPTS.find((s) => s.id === scriptId);
 
@@ -36,44 +63,17 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ===== GitHub private repo loader =====
-  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
-
-  try {
-    const response = await fetch(githubURL, {
-      headers: {
-        Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-        Accept: "application/vnd.github+json",
-      },
-    });
-
-    if (!response.ok) {
-      return new NextResponse("-- Script not found", { status: 404 });
-    }
-
-    const data = await response.json();
-    const script = Buffer.from(data.content, "base64").toString("utf8");
-
-    return new NextResponse(script, {
-      headers: {
-        "Content-Type": "text/plain",
-        "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  } catch (error) {
-    // ===== Fallback =====
-    const fallbackScript = `-- XZuyaX's HUB Loader (fallback)
+  // ===== Final fallback =====
+  const fallbackScript = `-- XZuyaX's HUB Loader (fallback)
 -- Visit https://xzuyax-hub.vercel.app for scripts
 
 loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()`;
 
-    return new NextResponse(fallbackScript, {
-      headers: {
-        "Content-Type": "text/plain",
-        "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
-  }
+  return new NextResponse(fallbackScript, {
+    headers: {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
+    },
+  });
 }
