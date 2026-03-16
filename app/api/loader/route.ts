@@ -4,9 +4,11 @@ import { SCRIPTS } from "@/lib/scripts-data";
 export async function GET(request: NextRequest) {
   const userAgent = request.headers.get("user-agent") || "";
   const { searchParams } = new URL(request.url);
+
+  const scriptName = searchParams.get("script") || "UniversalLoader.lua";
   const scriptId = searchParams.get("id");
 
-  // Deteksi browser
+  // ===== Detect browser =====
   const isBrowser =
     userAgent.includes("Mozilla") ||
     userAgent.includes("Chrome") ||
@@ -14,14 +16,15 @@ export async function GET(request: NextRequest) {
     userAgent.includes("Firefox") ||
     userAgent.includes("Edge");
 
+  // Browser → redirect ke halaman scripts
   if (isBrowser) {
-    // Redirect pengguna browser ke halaman /scripts
     return NextResponse.redirect(new URL("/scripts", request.url));
   }
 
-  // Jika dari executor dan ada parameter id, cari di data statis
+  // ===== Local static scripts =====
   if (scriptId) {
     const script = SCRIPTS.find((s) => s.id === scriptId);
+
     if (script) {
       return new NextResponse(script.content, {
         headers: {
@@ -33,8 +36,9 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Default: ambil UniversalLoader.lua dari GitHub private repo
-  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/UniversalLoader.lua`;
+  // ===== GitHub private repo loader =====
+  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
+
   try {
     const response = await fetch(githubURL, {
       headers: {
@@ -43,32 +47,33 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      const script = Buffer.from(data.content, "base64").toString("utf8");
-      return new NextResponse(script, {
-        headers: {
-          "Content-Type": "text/plain",
-          "Cache-Control": "no-cache",
-          "Access-Control-Allow-Origin": "*",
-        },
-      });
+    if (!response.ok) {
+      return new NextResponse("-- Script not found", { status: 404 });
     }
-  } catch (error) {
-    // Abaikan error, lanjut ke fallback
-  }
 
-  // Fallback ke loader dari workers.dev jika GitHub gagal
-  const fallbackScript = `-- XZuyaX's HUB Loader (fallback)
+    const data = await response.json();
+    const script = Buffer.from(data.content, "base64").toString("utf8");
+
+    return new NextResponse(script, {
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  } catch (error) {
+    // ===== Fallback =====
+    const fallbackScript = `-- XZuyaX's HUB Loader (fallback)
 -- Visit https://xzuyax-hub.vercel.app for scripts
 
 loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()`;
 
-  return new NextResponse(fallbackScript, {
-    headers: {
-      "Content-Type": "text/plain",
-      "Cache-Control": "no-cache",
-      "Access-Control-Allow-Origin": "*",
-    },
-  });
+    return new NextResponse(fallbackScript, {
+      headers: {
+        "Content-Type": "text/plain",
+        "Cache-Control": "no-cache",
+        "Access-Control-Allow-Origin": "*",
+      },
+    });
+  }
 }
