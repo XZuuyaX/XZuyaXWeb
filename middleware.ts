@@ -4,10 +4,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accept = request.headers.get("accept") || "";
 
-  // ===== STATIC FILES =====
+  // ===== WHITELIST (tidak diproses middleware) =====
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
+    pathname.startsWith("/scripts") ||
+    pathname.startsWith("/game") ||
     pathname === "/favicon.ico" ||
     pathname.startsWith("/icon") ||
     pathname.startsWith("/images")
@@ -15,12 +17,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ===== WEBSITE PAGES (browser) =====
+  // ===== Browser → tampilkan website =====
   if (accept.includes("text/html")) {
     return NextResponse.next();
   }
 
-  // ===== EXECUTOR ROOT =====
+  // ===== Executor root → UniversalLoader =====
   if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/api/loader";
@@ -28,7 +30,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.rewrite(url);
   }
 
-  // ===== EXECUTOR SCRIPT PATH =====
+  // ===== Executor script path =====
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
   url.searchParams.set("script", pathname.replace("/", ""));
