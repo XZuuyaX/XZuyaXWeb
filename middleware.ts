@@ -1,15 +1,20 @@
+import { NextRequest, NextResponse } from "next/server"
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accept = request.headers.get("accept") || "";
+  const ua = request.headers.get("user-agent") || "";
+  const acceptHeader = request.headers.get("accept") || "";
 
-  // ===== WHITELIST (tidak diproses middleware) =====
+  const { pathname } = request.nextUrl
+  const acceptHeader = request.headers.get("accept") || ""
+
+  // browser request → tampil website normal
+  if (acceptHeader.includes("text/html")) {
+    return NextResponse.next()
+  // --- WHITELIST STATIC FILES supaya favicon & _next tetap bisa di-load ---
   if (
     pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/scripts") ||
-    pathname.startsWith("/game") ||
     pathname === "/favicon.ico" ||
     pathname.startsWith("/icon") ||
     pathname.startsWith("/images")
@@ -17,26 +22,42 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ===== Browser → tampilkan website =====
-  if (accept.includes("text/html")) {
-    return NextResponse.next();
-  }
-
-  // ===== Executor root → UniversalLoader =====
+  // executor root → UniversalLoader
+  // --- ROOT PATH ---
   if (pathname === "/") {
+    const url = request.nextUrl.clone()
+    url.pathname = "/api/loader"
+    url.searchParams.set("script", "UniversalLoader.lua")
+    return NextResponse.rewrite(url)
+  }
+    // Browser normal
+    if (ua.includes("Mozilla") && acceptHeader.includes("text/html")) {
+      return NextResponse.next();
+    }
+
+  // executor path script
+  if (pathname !== "/") {
+    const url = request.nextUrl.clone()
+    url.pathname = "/api/loader"
+    url.searchParams.set("script", pathname.replace("/", ""))
+    return NextResponse.rewrite(url)
+    // Executor request → loader
     const url = request.nextUrl.clone();
     url.pathname = "/api/loader";
     url.searchParams.set("script", "UniversalLoader.lua");
     return NextResponse.rewrite(url);
   }
 
-  // ===== Executor script path =====
+  return NextResponse.next()
+  // --- PATH SCRIPT LAIN (executor) ---
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
   url.searchParams.set("script", pathname.replace("/", ""));
   return NextResponse.rewrite(url);
 }
 
+// Matcher → semua path
 export const config = {
   matcher: ["/:path*"],
+}
 };
