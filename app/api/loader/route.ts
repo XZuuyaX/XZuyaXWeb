@@ -1,61 +1,68 @@
-import { NextRequest, NextResponse } from "next/server";
-import { SCRIPTS } from "@/lib/scripts-data";
+import { NextRequest, NextResponse } from "next/server"
+import { SCRIPTS } from "@/lib/scripts-data"
 
 export async function GET(request: NextRequest) {
-  const userAgent = request.headers.get("user-agent") || "";
-  const { searchParams } = new URL(request.url);
-  const scriptParam = searchParams.get("script") || "";
+  const userAgent = request.headers.get("user-agent") || ""
+  const { searchParams } = new URL(request.url)
+  const scriptId = searchParams.get("id")
 
-  // Deteksi browser: jika user-agent mengandung identifier browser umum
-  const isBrowser = /Mozilla|Chrome|Safari|Firefox|Edge/i.test(userAgent);
-  if (isBrowser) {
-    // Redirect ke halaman scripts
-    return NextResponse.redirect(new URL("/scripts", request.url));
+  // Deteksi browser → redirect ke halaman website
+  if (
+    userAgent.includes("Mozilla") ||
+    userAgent.includes("Chrome") ||
+    userAgent.includes("Safari") ||
+    userAgent.includes("Firefox") ||
+    userAgent.includes("Edge")
+  ) {
+    return NextResponse.redirect(new URL("/scripts", request.url))
   }
 
-  // Coba cari script di data statis berdasarkan id (param "script" dianggap sebagai id)
-  const staticScript = SCRIPTS.find(s => s.id === scriptParam);
-  if (staticScript) {
-    // Kembalikan konten dari data statis (sudah berupa loadstring)
-    return new NextResponse(staticScript.content, {
-      headers: {
-        "Content-Type": "text/plain",
-        "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
+  // Akses dari executor: jika ada parameter id, cari di data statis
+  if (scriptId) {
+    const script = SCRIPTS.find((s) => s.id === scriptId)
+    if (script) {
+      return new NextResponse(script.content, {
+        headers: { "Content-Type": "text/plain" },
+      })
+    }
   }
 
-  // Jika tidak ditemukan di statis, fallback ke GitHub (sesuai kode lama)
-  // Gunakan scriptParam sebagai nama file, atau default "UniversalLoader.lua"
-  const scriptName = scriptParam || "UniversalLoader.lua";
-  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
-
+  // Default: ambil UniversalLoader.lua dari GitHub private repo
+  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/UniversalLoader.lua`
   try {
     const response = await fetch(githubURL, {
       headers: {
         Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
         Accept: "application/vnd.github+json",
       },
-    });
+    })
 
-    if (!response.ok) {
-      // Jika GitHub juga tidak menemukan, kembalikan pesan error
-      return new NextResponse("-- Script not found", { status: 404 });
+    if (response.ok) {
+      const data = await response.json()
+      const script = Buffer.from(data.content, "base64").toString("utf8")
+      return new NextResponse(script, {
+        headers: {
+          "Content-Type": "text/plain",
+          "Cache-Control": "no-cache",
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
     }
-
-    const data = await response.json();
-    const script = Buffer.from(data.content, "base64").toString("utf8");
-
-    return new NextResponse(script, {
-      headers: {
-        "Content-Type": "text/plain",
-        "Cache-Control": "no-cache",
-        "Access-Control-Allow-Origin": "*",
-      },
-    });
   } catch (error) {
-    // Error saat fetch GitHub
-    return new NextResponse("-- Internal server error", { status: 500 });
+    // Abaikan error, lanjut ke fallback
   }
+
+  // Fallback jika GitHub gagal (misalnya token tidak valid atau rate limit)
+  const fallbackScript = `-- XZuyaX's HUB Loader (fallback)
+-- Visit https://xzuyax-hub.vercel.app for scripts
+
+loadstring(game:HttpGet("https://loaders.xzuyaxhub.workers.dev"))()`
+
+  return new NextResponse(fallbackScript, {
+    headers: {
+      "Content-Type": "text/plain",
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*",
+    },
+  })
 }
