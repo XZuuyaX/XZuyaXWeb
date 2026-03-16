@@ -7,14 +7,16 @@ export function middleware(request: NextRequest) {
 
   // --- WHITELIST ---
   if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/scripts") ||
-    pathname === "/favicon.ico" ||
-    pathname.startsWith("/icon") ||
-    pathname.startsWith("/images")
-  ) {
-    return NextResponse.next();
+  pathname.startsWith("/_next") ||
+  pathname.startsWith("/api") ||
+  pathname.startsWith("/scripts") ||
+  pathname.startsWith("/game") ||
+  pathname === "/" ||
+  pathname === "/favicon.ico" ||
+  pathname.startsWith("/icon") ||
+  pathname.startsWith("/images")
+) {
+  return NextResponse.next();
   }
 
   // --- ROOT PATH ---
