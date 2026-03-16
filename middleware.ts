@@ -2,36 +2,33 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ua = request.headers.get("user-agent") || "";
-  const acceptHeader = request.headers.get("accept") || "";
+  const accept = request.headers.get("accept") || "";
 
-  // --- WHITELIST ---
+  // ===== STATIC FILES =====
   if (
-  pathname.startsWith("/_next") ||
-  pathname.startsWith("/api") ||
-  pathname.startsWith("/scripts") ||
-  pathname.startsWith("/game") ||
-  pathname === "/" ||
-  pathname === "/favicon.ico" ||
-  pathname.startsWith("/icon") ||
-  pathname.startsWith("/images")
-) {
-  return NextResponse.next();
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname === "/favicon.ico" ||
+    pathname.startsWith("/icon") ||
+    pathname.startsWith("/images")
+  ) {
+    return NextResponse.next();
   }
 
-  // --- ROOT PATH ---
-  if (pathname === "/") {
-    if (ua.includes("Mozilla") && acceptHeader.includes("text/html")) {
-      return NextResponse.next();
-    }
+  // ===== WEBSITE PAGES (browser) =====
+  if (accept.includes("text/html")) {
+    return NextResponse.next();
+  }
 
+  // ===== EXECUTOR ROOT =====
+  if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/api/loader";
     url.searchParams.set("script", "UniversalLoader.lua");
     return NextResponse.rewrite(url);
   }
 
-  // --- EXECUTOR SCRIPT PATH ---
+  // ===== EXECUTOR SCRIPT PATH =====
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
   url.searchParams.set("script", pathname.replace("/", ""));
