@@ -3,9 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ua = (request.headers.get("user-agent") || "").toLowerCase();
 
-  // Lewati semua static & API
+  // Lewati static files, API, dan halaman website
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/images") ||
@@ -17,12 +16,16 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Semua request selain browser → ke loader
+  // SEMUA request lain (termasuk executor) → paksa ke loader
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
 
-  const cleanPath = pathname === "/" ? "UniversalLoader.lua" : pathname.replace("/", "");
-  url.searchParams.set("script", cleanPath);
+  if (pathname === "/" || pathname === "") {
+    url.searchParams.set("script", "UniversalLoader.lua");
+  } else {
+    const scriptName = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+    url.searchParams.set("script", scriptName);
+  }
 
   return NextResponse.rewrite(url);
 }
