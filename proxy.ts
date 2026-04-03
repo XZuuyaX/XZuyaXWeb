@@ -3,41 +3,41 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const ua = request.headers.get("user-agent") || "";
-  const acceptHeader = request.headers.get("accept") || "";
+  const ua = (request.headers.get("user-agent") || "").toLowerCase();
+  const accept = (request.headers.get("accept") || "").toLowerCase();
 
-  // Static files & assets dilewatin
+  // Lewati static files & assets
   if (
     pathname.startsWith("/_next") ||
-    pathname === "/favicon.ico" ||
-    pathname.startsWith("/icon") ||
     pathname.startsWith("/images") ||
-    pathname.startsWith("/scripts")
+    pathname.startsWith("/icon") ||
+    pathname === "/favicon.ico" ||
+    pathname.startsWith("/scripts") ||   // halaman website kamu
+    pathname.startsWith("/api")
   ) {
     return NextResponse.next();
   }
 
-  // Browser biasa → tampilkan website normal
-  if (acceptHeader.includes("text/html") || ua.includes("Mozilla")) {
+  // Browser biasa yang minta HTML → tampilkan website
+  if (accept.includes("text/html") || ua.includes("mozilla")) {
     return NextResponse.next();
   }
 
-  // Root path → UniversalLoader
-  if (pathname === "/" || pathname === "") {
-    const url = request.nextUrl.clone();
-    url.pathname = "/api/loader";
-    url.searchParams.set("script", "UniversalLoader.lua");
-    return NextResponse.rewrite(url);
-  }
-
-  // Path lain → load script sesuai nama path
+  // Semua request lain (executor, curl, dll) → redirect ke loader
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
-  url.searchParams.set("script", pathname.replace("/", ""));
+
+  if (pathname === "/" || pathname === "") {
+    url.searchParams.set("script", "UniversalLoader.lua");
+  } else {
+    // hapus leading slash
+    const scriptName = pathname.startsWith("/") ? pathname.slice(1) : pathname;
+    url.searchParams.set("script", scriptName);
+  }
+
   return NextResponse.rewrite(url);
 }
 
-// Jalankan di semua path
 export const config = {
   matcher: ["/:path*"],
 };
