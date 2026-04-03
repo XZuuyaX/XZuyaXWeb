@@ -5,15 +5,17 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const scriptName = searchParams.get("script") || "UniversalLoader.lua";
   const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
+  const accept = (req.headers.get("accept") || "").toLowerCase();
 
-  console.log(`[LOADER] Requested: ${scriptName} | UA: ${userAgent.substring(0, 100)}...`);
+  console.log(`[LOADER] Script: ${scriptName} | UA: ${userAgent} | Accept: ${accept}`);
 
-  // Browser detection
-  if (userAgent.includes("mozilla")) {
+  // Hanya redirect ke /scripts kalau benar-benar browser yang minta HTML
+  if (accept.includes("text/html")) {
+    console.log("[LOADER] Browser detected → redirect to /scripts");
     return NextResponse.redirect(new URL("/scripts", req.url));
   }
 
-  // Fetch dari GitHub
+  // Executor / HttpGet → load script
   const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
 
   const response = await fetch(githubURL, {
@@ -26,8 +28,8 @@ export async function GET(req: Request) {
   });
 
   if (!response.ok) {
-    console.error(`GitHub Error ${response.status}: ${scriptName}`);
-    return new NextResponse(`-- Script not found: ${scriptName}\n`, { 
+    console.error(`[LOADER] GitHub Error ${response.status} for ${scriptName}`);
+    return new NextResponse(`-- Script not found: ${scriptName}`, { 
       status: 404,
       headers: { "Content-Type": "text/plain" }
     });
@@ -38,7 +40,7 @@ export async function GET(req: Request) {
   return new NextResponse(script, {
     headers: {
       "Content-Type": "text/plain",
-      "Cache-Control": "no-cache, no-store",
+      "Cache-Control": "no-cache, no-store, must-revalidate",
       "Access-Control-Allow-Origin": "*",
     },
   });
