@@ -1,57 +1,48 @@
-// app/api/loader/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 
+export async function GET(request: NextRequest) {
+
+  const userAgent = request.headers.get("user-agent") || ""
+  const { searchParams } = new URL(request.url)
 export async function GET(req: Request) {
-  const { searchParams } = new URL(req.url);
-  const scriptName = searchParams.get("script") || "UniversalLoader.lua";
-  const userAgent = (req.headers.get("user-agent") || "").toLowerCase();
 
-  // Logging untuk debug (bisa dilihat di Vercel Logs)
-  console.log(`[LOADER] Script requested: ${scriptName} | User-Agent: ${userAgent}`);
+  const { searchParams } = new URL(req.url)
+  const scriptName = searchParams.get("script") || "UniversalLoader.lua"
 
-  // Jika yang akses adalah Browser → redirect ke halaman website
-  if (userAgent.includes("mozilla") || 
-      userAgent.includes("chrome") || 
-      userAgent.includes("safari") || 
-      userAgent.includes("firefox") || 
-      userAgent.includes("edge")) {
-    
-    console.log(`[LOADER] Browser detected, redirecting to /scripts`);
-    return NextResponse.redirect(new URL("/scripts", req.url));
+  // Browser → buka website
+  if (
+    userAgent.includes("Mozilla") ||
+    userAgent.includes("Chrome") ||
+    userAgent.includes("Safari") ||
+    userAgent.includes("Firefox") ||
+    userAgent.includes("Edge")
+  ) {
+    return NextResponse.redirect(new URL("/scripts", request.url))
   }
 
-  // Executor / Script Executor → ambil dari GitHub
-  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`;
-
-  console.log(`[LOADER] Fetching from GitHub: ${githubURL}`);
+  // Executor → ambil script dari GitHub private repo
+  const githubURL = `https://api.github.com/repos/XZuuyaX/XZuyaXsHUBPrivate/contents/${scriptName}`
 
   const response = await fetch(githubURL, {
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: "application/vnd.github.v3.raw",
-      "User-Agent": "XZuyaX-Hub-Loader", // GitHub kadang butuh ini
-    },
-    cache: "no-store",        // pastikan selalu ambil versi terbaru
-  });
+@@ -29,7 +15,7 @@ export async function GET(request: NextRequest) {
+  })
 
   if (!response.ok) {
-    console.error(`[LOADER] GitHub Error: ${response.status} ${response.statusText}`);
-    return new NextResponse(`-- Script not found: ${scriptName}`, { 
-      status: 404,
-      headers: { "Content-Type": "text/plain" }
-    });
+    return new NextResponse("Script not found", { status: 404 })
+    return new NextResponse("-- Script not found", { status: 404 })
   }
 
-  const script = await response.text();
-
-  console.log(`[LOADER] Successfully loaded \( {scriptName} ( \){script.length} characters)`);
+  const data = await response.json()
+@@ -39,6 +25,10 @@ export async function GET(request: NextRequest) {
+    .toString("utf8")
 
   return new NextResponse(script, {
+    headers: { "Content-Type": "text/plain" }
     headers: {
       "Content-Type": "text/plain",
-      "Cache-Control": "no-cache, no-store, must-revalidate",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET",
-    },
-  });
+      "Cache-Control": "no-cache",
+      "Access-Control-Allow-Origin": "*"
+    }
+  })
 }
