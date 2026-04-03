@@ -6,6 +6,9 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-}
+  experimental: {
+    // turbo: { /* kalau mau pakai turbopack lagi nanti */ }
+  },
+};
 
-export default nextConfig
+export default nextConfig;
