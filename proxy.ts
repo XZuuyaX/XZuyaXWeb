@@ -3,20 +3,26 @@ import { NextRequest, NextResponse } from "next/server";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const ua = (request.headers.get("user-agent") || "").toLowerCase();
+  const accept = (request.headers.get("accept") || "").toLowerCase();
 
-  // Lewati static files, API, dan halaman website
+  // Lewati static files & API
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/images") ||
     pathname.startsWith("/icon") ||
     pathname === "/favicon.ico" ||
-    pathname.startsWith("/scripts") ||
     pathname.startsWith("/api")
   ) {
     return NextResponse.next();
   }
 
-  // SEMUA request lain (termasuk executor) → paksa ke loader
+  // Jika request minta HTML (browser biasa) → tampilkan website normal
+  if (accept.includes("text/html")) {
+    return NextResponse.next();
+  }
+
+  // Executor / HttpGet → ke loader
   const url = request.nextUrl.clone();
   url.pathname = "/api/loader";
 
